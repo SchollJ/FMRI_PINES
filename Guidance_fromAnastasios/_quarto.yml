@@ -1,0 +1,90 @@
+project:
+  type: website
+
+website:
+  title: "MRI analysis"
+  page-navigation: true
+  page-footer: "Copyright 2024, Anastasios Dadiotis" 
+  search: 
+    location: navbar
+    type: overlay
+    copy-button: true
+    
+  navbar:
+    background: dark
+    search: true
+    copy-button: true
+    foreground: light
+    left:
+      - href: index.qmd
+        text: Overview
+      - href: MRIQC.qmd
+        text: MRIQC
+      - href: fMRIPrep.qmd
+        text: fMRIPrep
+      - href: code.qmd
+        text: Analyses
+      - href: Technical_stuff_intro.qmd
+        text: Technical notes
+    
+
+  sidebar:
+    - id: MRIQC
+    - title: "MRIQC"
+      style: "floating"
+      background: light
+      contents:
+        - href: MRIQC.qmd
+          text: MRIQC
+        - href: run_mriqc.qmd
+          text: Run MRIQC in CRNL cluster
+        - href: MRIQC_BOLD.qmd
+          text: BOLD visual reports
+        - href: MRIQC_Anat.qmd
+          text: Anatomical visual reports
+        - href: IQMs_individual.qmd
+          text: Individual IQMs
+    
+    - id: fMRIPrep
+    - title: "fMRIPrep"
+      style: "floating"
+      background: light
+      contents:
+        - href: run_fmriprep.qmd
+          text: Run fmriprep in CRNL cluster
+        - href: fMRIPrep.qmd
+          text: fMRI preprocessing
+        - href: fMRIPrep_visual_reports.qmd
+          text: fMRIPrep visual reports
+          
+    - id:  Analyses
+    - title: "Analyses"
+      style: "floating"
+      background: light
+      contents:
+        - href: code.qmd
+          text: Analyses overview
+        - href: Bids_conversion.qmd
+          text: BIDS conversion
+        - href: Preprocessing.qmd
+          text: Preprocessing
+      
+    - id:  Technical notes
+    - title: "Technical notes"
+      style: "floating"
+      background: light
+      contents:
+        - href: Technical_stuff_intro.qmd
+          text: Introduction
+        - href: multi_echo.qmd
+          text: Multi - Echo 
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+
+
+

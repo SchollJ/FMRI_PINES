@@ -1,0 +1,185 @@
+---
+title: "Run MRIQC in CRNL cluster"
+author: "Anastasios Dadiotis"
+editor: visual
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+---
+
+# Set up 
+In this preliminary step we setup and define our variables. Note from the code below, change the variable “subject” to the subject you are working on. The Tiger notation is C for controls and G for Gamblers, e.g. for the first control subject the notation is C01 and for the first gambler G01. The following procedure is to submit the job for one subject. (to be updated for more).
+
+``` bash
+# Standard variable for the Tiger study
+WD=/crnldata/psyr2/Anastasios/Tiger_fmri
+my_study=Tiger
+session_name=S01
+
+# change this to the subject you are working on
+subject=XXX 
+```
+
+# Submit the job
+
+Run the following code to submit the job to the cluster. This is for one subject only. There are scripts for multiple subjects via Slurm array jobs. (To be updated)
+
+``` bash
+# Submit the job
+cd ${WD}/${my_study}/code
+sbatch step4_mriqc.sh ${subject} ${session_name} ${WD} ${my_study}
+squeue
+```
+
+# Notes and Errors
+
+I Run the job for the first time and i the job failed because it was out of memory. **(exit code 137).**
+I tried to increase the memory in the SBATCH directives in the step4_mriqc.sh file. I Tried with 100G. This did not work either
+Just for check i will run it for only the T1 images just to see what is going on. NOTE that the T1w are significantly smaller size that the bold. 
+If this does not work then there is definetely a problem. So this run correctly, i will now try for the bold to see if only the bold will be executed.
+Bold job was again killed due to memory issues. What i will do next is to reduce to  --nprocs 8 and --omp-nthreads 4 (This setup means MRIQC will not use more than 8 processes at a time, and each process will use up to 2 threads if multi-threading is supported by the task). NOTE: This might considerably slow down the job.
+Another solution would be to run MRIQC for each task seperetely as we did with T1w. **To be checked**
+
+ - With these parameters above (--nprocs 8 and --omp-nthreads 4) it was executed succesfully. However, it took almost 2 hours for the bold images. It is worth trying submitting a unique job for each task in each modality as this could be faster. Another thing to try is play with the parameters. For instance, next we can try --nprocs 10 and --omp-nthreads 6 and if this works then double the original parameters
+ 
+ 
+# Scripts
+ 
+ ``` {.bash filename="step4_mriqc.sh" code-line-numbers="true" code-fold="true"}
+ #!/bin/bash
+
+###############################
+### from https://bircibrain.github.io/computingguide/docs/fmri-preprocessing/mriqc.html#singularitystorrs-hpc
+### 
+### Adapted for the CRNL 
+### by Gaelle Leroux, PhD
+### and Isabelle Faillenot, PhD
+###
+### Fall 2020, Lyon
+### gaelle.leroux @ cnrs.fr
+###
+### launched by: sbatch step4_mriqc.sh ${subject} ${session_name} ${WD} ${my_study}
+###
+###############################
+#
+### The SBATCH directives for a sequential (email line 37 to be revised only):
+
+### Your job name displayed by the queue
+### use "squeue" command in a terminal to see it
+#SBATCH --job-name=mriQC
+
+### Specify output and error files
+### %A for job array's master job allocation number
+### or %a for job array ID (index) number
+#SBATCH --output=out_mriQC_%A.log
+#SBATCH --error=err_mriQC_%A.log
+
+### Specify the number of tasks, CPU per task and buffer size to be used
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=100G
+
+
+### Send email for which step: NONE, BEGIN, END, FAIL, REQUEUE, ALL
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=${firstName}.${lastName}@univ-lyon1.fr
+
+### The size of the participant table to be run
+###SBATCH --array=1-1
+
+### If you want to launch your script on a specific node of the cluser
+### If yes, uncomment the appropirate line(s) 
+###SBATCH --nodelist=node9
+#SBATCH --exclude=node9
+###SBATCH --exclude=node[9-10]
+
+# End of the SBATCH directives
+###############################
+#
+# Paths of the study
+subject=$1
+session_name=$2
+WD=$3
+my_study=$4
+STUDY=${WD}/${my_study}
+DATA_DIRECTORY=${STUDY}"/data"
+OUTPUT_DIRECTORY=${DATA_DIRECTORY}"/bids"
+#
+MRIQC_SINGULARITY_IMG="/mnt/data/soft/Images/mriqc_23.1.0.sif"
+#
+## Comment: Parse the participants.tsv file and extract one subject ID from the line corresponding to this SLURM task.
+## Comment: 1 line below to uncomment if you want to launch the script for all the subjects listed in ${DATA_DIRECTORY}/participants.tsv
+#subject=$( sed -n -E "$((${SLURM_ARRAY_TASK_ID} + 1))s/sub-(\S*)\>.*/\1/gp" ${DATA_DIRECTORY}/participants.tsv )
+#
+###############################
+#
+# To be printed in the out_mriQC_*.log file :
+echo "#########################################################################"
+echo "USER:" $USER
+echo "#"
+echo "SLURM_SUBMITING_DIRECTORY:" $SLURM_SUBMIT_DIR
+echo "SLURM_JOB_NODELIST:" $SLURM_NODELIST
+echo "SLURM_JOB_NAME:" $SLURM_JOB_NAME
+echo "SLURM_JOB_ID:" $SLURM_JOBID
+echo "SLURM_ARRAY_TASK_ID:" $SLURM_ARRAY_TASK_ID
+echo "SLURM_NTASKS:" $SLURM_NTASKS
+echo "#"
+echo "Step 4: Control of the quality of images using mriQC BIDSapp"
+echo "#"
+echo "Subject:" ${subject}
+echo "Session:" ${session_name}
+echo "#"
+echo "Job STARTED @ $(date)"
+echo "#"
+#
+# PREREQUISITE: a dataset organised according to BIDS standards.
+# NOW: submission to slurm workload manager and run a singularity image for mriQC 
+#
+# Compose the command line
+#
+# Note that this is only for one modality for a check! REMEMBER to change it afterwards to run all modalities
+######## PLAYING WITH THE --nprocs and --omp-nthreads 4 to find the sweet spot remember to change that
+
+
+cmd="srun singularity run \
+	--cleanenv \
+	--bind ${STUDY}:/base --bind ${DATA_DIRECTORY}:/data --bind ${OUTPUT_DIRECTORY}:/out \
+	${MRIQC_SINGULARITY_IMG} \
+	/data/bids /out/derivatives/mriqc participant \
+	--participant-label ${subject} \
+	--modalities bold \
+	--work-dir /base/code/logs/mriqc_intermediate_results_${subject} \
+	--mem 96 \
+    --nprocs 8 \
+    --omp-nthreads 4 \
+	--profile \
+	--verbose-reports \
+	--write-graph \
+	--fft-spikes-detector"
+
+# Setup done, run the command
+echo "Command line used (example of the last subject processed)"
+echo $cmd
+echo "#"
+#
+eval $cmd
+exitcode=$?
+#
+echo "#"
+echo "Job STOPPED @ $(date)"
+echo "#"
+echo "If MRIQC successful, the last end of the out*.log file is:"
+echo "<Participant level finished successfully> Otherwise, a problem occured."
+echo "#"
+echo "Check that "$OUTPUT_DIRECTORY"/derivatives/mriqc and mriqc_working_directory"
+echo "folders have been created & look at all reports created."
+echo "############################################################################################"
+echo "#"
+# Output results to a table
+echo "sub-${subject}	${SLURM_ARRAY_TASK_ID}	$exitcode" >> ${SLURM_JOB_NAME}.step4.${SLURM_ARRAY_JOB_ID}.tsv
+echo Finished tasks ${SLURM_ARRAY_TASK_ID} with exit code $exitcode
+exit $exitcode
+```

@@ -1,0 +1,107 @@
+---
+title: "Preprocessing"
+author: "Anastasios Dadiotis"
+editor: visual
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+---
+
+# Intro 
+Preprocessing does not end with fmriprep. We need to do some additional preprocessing steps to prepare the data for the analysis. 
+
+## Smoothing
+
+fmriprep does not include smoothing. Smoothing is a preprocessing step that is often applied to fMRI data. It is used to increase the signal-to-noise ratio and to reduce the impact of individual differences in anatomy. Smoothing is done by applying a Gaussian filter to the data. The size of the filter is determined by the full-width at half-maximum (FWHM) parameter. The FWHM parameter specifies the width of the Gaussian filter in millimeters. The larger the FWHM, the more smoothing is applied to the data.
+
+### Smoothing with FSL
+
+Next chunk submit a job to the cluster to smooth the data using FSL.
+
+In this script no set up is required as i have incorporated to the script. Just cd in the code directory and run the following command passing the relevant arguments.
+
+``` bash
+sbatch step06_smoothing.sh <subject> <sigma> <prefix>
+squeue
+```
+
+# Smoothing script
+
+``` {.bash filename="step6_smoothing.sh" code-line-numbers="true" code-fold="true"}
+
+#!/bin/bash
+
+##### slurm directives ##########
+#SBATCH --job-name=step6_smoothing
+#SBATCH --output=out_smooth_all_images_%j.log
+#SBATCH --error=error_smooth_all_images_%j.log
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --mail-type=ALL
+###SBATCH --mail-user=anastasios.dadiotis@etu.univ-lyon1.fr
+
+##### End of slurm directives ####
+
+# Script to smooth fMRI images using fslmaths
+# Author: Anastasios Dadiotis
+# Date: 16/05/2024
+#
+# Usage:
+#   sbatch step06_smoothing.sh <subject> <sigma> <prefix>
+#
+# Arguments:
+#   subject - Subject identifier (e.g., CO1)
+#   sigma   - Standard deviation for the Gaussian kernel (e.g., 2.123 for FWHM of 5mm) see https://kathleenhupfeld.com/how-to-smooth-images-in-fsl-its-different-from-spm/
+#                                                                                          on how to smooth images in FSL
+#   prefix  - Prefix to add to the output file names (e.g., smo0.5)
+#
+# Example:
+#   sbatch step06_smoothing.sh CO1 2.123 smo0.5
+#
+# Note: If you want to smooth specific images, you can modify the wild card in the for loop below
+
+
+# Paths of the study
+WD="/crnldata/psyr2/Anastasios/Tiger_fmri"
+my_study="Tiger"
+
+# Define the subject and the sigma
+subject=$1
+sigma=$2 # For FWHM of 5mm, sigma = 5/2.354
+prefix=$3
+
+# To be printed in the out_*.log file :
+echo "#########################################################################"
+echo "User:" $USER
+echo "#"
+echo "Smoothing images with sigma = $sigma"
+echo "#"
+echo "Job STARTED @ $(date)"
+
+# Define input and output files
+input_dir="${WD}/${my_study}/data/bids/derivatives/fmriprep/sub-${subject}/ses-S01/func"
+output_dir="${WD}/${my_study}/data/bids/derivatives/${prefix}"
+
+# create the output directory if it does not exist
+mkdir -p $output_dir
+
+for func_file in $input_dir/*desc-preproc_bold.nii.gz; do
+    echo "Processing $func_file"
+    # get the name of the input file
+    base_name=$(basename $func_file)
+
+    # get the name of the output file
+    output_file=${output_dir}/${prefix}_${base_name}
+
+    # Run the smoothing
+    fslmaths $func_file -s $sigma $output_file
+    echo "Smoothing done for $func_file"
+done
+
+echo "Finished smoothing all images"
+```
+

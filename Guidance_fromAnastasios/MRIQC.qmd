@@ -1,0 +1,16 @@
+---
+title: "MRIQC"
+editor: visual
+---
+
+Interpretation on the visual inspection of the individual MRIQC
+
+For more information see the [documentation](https://mriqc.readthedocs.io/en/latest/index.html) of the MRQC
+
+Note: The artifacts yielding exclusion are pointed using [red arrows]{style="color:red;"}, while the artifacts not yielding exclusion are pointed using [green arrows]{style="color:green;"}.
+
+To be added:
+
+1.  IQMs individual level
+2.  Visual inspection to group level
+3.  IQMs group level

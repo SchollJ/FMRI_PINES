@@ -1,0 +1,13 @@
+---
+title: "Technical stuff"
+editor: visual
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+---
+
+## Intro
+
+Notes on some technical things (like multi-echo acquisitions) that might be useful.

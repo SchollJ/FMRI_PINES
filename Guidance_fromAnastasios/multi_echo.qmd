@@ -1,0 +1,97 @@
+---
+title: "Multi - Echo"
+editor: visual
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+---
+
+## Introduction
+
+<https://tedana.readthedocs.io/en/latest/index.html>
+
+Most of the notes in this document are based on the above [toolbox](https://tedana.readthedocs.io/en/latest/index.html), which is also the toolbox that is used by default in fmriprep pipeline.
+
+## What is multi-echo fmri?
+
+-   TE (echo time): the time between triggering the Protons and capturing the information they decay.
+
+-   Collecting data at multiple echo times, resulting in multiple volumes with varying levels of contrast acquired per RF pulse.
+
+-   Multi - echo fmri is obtained by acquiring multi-echo times (TE) for each MRI volume during data collection.
+
+## Why use multi -echo ?
+
+-   Compare results across different echoes
+
+-   **Combine the results by weighted averaging:** Rather than analsysing single -echo time series separately, we can combine them into  an "optimally combined time series
+
+    -   **Optimally combined data exhibit**
+
+        -   **Higher SNR**
+
+        -   **Improves statistical power of analyses in regions traditionally affected by drop-out**
+
+-   Denoise the data based on information contained in the echoes
+
+    -   Use the information available only when looking at signal decay across multiple TEs.
+
+## Cost's and benefits of multi echo fmri
+
+1.  **A slight time cost.**
+
+    -   For ME fmri, the shortest Echo time is free since it's collected in the gap between the RF pulse and the single - echo.
+
+    -   Second echo tends to roughly much the single-echo TE.
+
+    -   Additional echoes require more time
+
+    -   For example, on a 3T MRI, if the T2\* weighted TE is 30ms for single echo fMRI, a multi-echo sequence may have TEs of 15.4, 29.7, and 44.0ms. In this example, the extra 14ms of acquisition time per RF pulse is the cost of multi-echo fMRI.
+
+2.  **Weighted average may lead to an increase in SNR**
+
+    -   A weighted average of the echoes to optimize T2\* weighting (sometimes called optimally combined) gives a reliable, modest boost in data quality.
+
+3.  **Consider the life of the dataset**
+
+    a.  If a data set is expected to be used for future analyses in later years, it is likely that more powerful approaches to multi-echo denoising will sufficiently mature and add even more value to a data set.
+
+4.  **You may recover signal in areas affected by dropout.**
+
+    -   Typical signal echo fmri uses an echo time that is appropriate for signal across most of the brain.
+
+    -   **This might lead to drop out in regions with low T2\* values --\> This can lead to lo or even no signal at all in some areas.**
+
+    -   **Thing of regions such as:**
+
+        -   **Orbitofrontal cortex**
+
+        -   **Ventral temporal cortex**
+
+        -   **Ventral striatum**
+
+## Multi - echo fMRI sequences
+
+-   For information about ME - fmri sequences with different scanners [see:](https://tedana.readthedocs.io/en/latest/multi-echo.html#acquiring-multi-echo-data)
+
+## Acquisition parameter recommendations
+
+A minimumof 3 echoes is required for running the current implementation fo TE-dependent denoising in tedana. It may be useful to have at least one echo that is earlier and one echo that is later than the TE one would use for single-echo T2\* weighted fMRI.
+
+**Note:**
+
+This is in contrast to the **dual echo** denoising method which uses a very early (\~5ms) first echo in order to clean data.
+
+## Tedana combination method
+
+Using the T2\*estimates, tedana combines signal across echoes using a weighted average. The echoes are weighted according to the formula
+
+![](resources/tedana_formula.png)
+
+The weights are then normalized across echoes. These normalized weights are then used to compute a weighted average that takes advantage of the higher signal in earlier echoes and the higher sensitivity at later echoes.
+
+ 
+
+ 

@@ -1,0 +1,32 @@
+#########################################################################
+User: jacqueline.scholl
+#
+SLURM_SUBMITING_DIRECTORY: /mnt/data/JacquelineScholl/PINES/code
+SLURM_JOB_NODELIST: node13
+SLURM_JOB_NAME: HeuDC_1
+SLURM_JOB_ID: 160176
+SLURM_ARRAY_TASK_ID:
+SLURM_NTASKS: 1
+#
+Step 1: generation of text files using HeuDiConv
+#
+Subject processed: ANRB1080
+Session processed: ndm
+#
+Job STARTED @ lun. 03 févr. 2025 16:51:35 CET
+#
+Running task
+Command line used (example of the last subject processed)
+srun singularity run --cleanenv -B /mnt/data/JacquelineScholl/PINES/data:/base /mnt/data/soft/Images/heudiconv_1.1.6.sif -d /base/dicom/{subject}/{session}/*/*.??? -s ANRB1080 --ses ndm -f convertall -c none -o /base/bids/derivatives --overwrite
+#
+#
+Job STOPPED @ lun. 03 févr. 2025 16:51:44 CET
+#
+If STEP 1 successful: 5 text files were generated in /mnt/data/JacquelineScholl/PINES/data/bids/derivatives/.heudiconv/ANRB1080/info
+#
+Now, STEP 2: edit the empty file heuristic.py just created and copy/paste it to /mnt/data/JacquelineScholl/PINES/code
+#
+An example of heuristic file for a study@primage is provided in /mnt/data/JacquelineScholl/PINES/code/heuristic_templates/heuristic.py
+#########################################################################
+#
+Finished tasks with exit code 0

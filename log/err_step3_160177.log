@@ -1,0 +1,63 @@
+rm: impossible de supprimer '/mnt/data/JacquelineScholl/PINES/data/bids/ANRB1080/ndm/.heudiconv/*.edit.txt': Aucun fichier ou dossier de ce type
+INFO: Running heudiconv version 1.1.0 latest 1.3.2
+INFO: Need to process 1 study sessions
+INFO: PROCESSING STARTS: {'subject': 'ANRB1080', 'outdir': '/base/bids/', 'session': 'ndm'}
+INFO: Processing 1134 dicoms
+INFO: Analyzing 1134 dicoms
+INFO: Generated sequence info for 13 studies with 1134 entries total
+INFO: Doing conversion using dcm2niix
+INFO: Converting /base/bids/sub-ANRB1080/ses-ndm/func/sub-ANRB1080_ses-ndm_task-pines_bold (499 DICOMs) -> /base/bids/sub-ANRB1080/ses-ndm/func . Converter: dcm2niix . Output types: ('nii.gz',)
+INFO: [Node] Setting-up "convert" in "/tmp/dcm2niix_2ceitk7/convert".
+INFO: [Node] Executing "convert" <nipype.interfaces.dcm2nii.Dcm2niix>
+INFO: stdout 2025-02-03T16:52:32.593259:Chris Rorden's dcm2niiX version v1.0.20220720  GCC10.2.1 x86-64 (64-bit Linux)
+INFO: stdout 2025-02-03T16:52:32.593259:Found 499 DICOM file(s)
+INFO: stdout 2025-02-03T16:52:32.593259:Convert 499 DICOM as /base/bids/sub-ANRB1080/ses-ndm/func/sub-ANRB1080_ses-ndm_task-pines_bold_heudiconv029 (96x96x60x499)
+INFO: stdout 2025-02-03T16:52:43.610146:Compress: "/usr/bin/pigz" -b 960 -n -f -6 "/base/bids/sub-ANRB1080/ses-ndm/func/sub-ANRB1080_ses-ndm_task-pines_bold_heudiconv029.nii"
+INFO: stdout 2025-02-03T16:52:43.610146:Conversion required 12.618589 seconds (2.770203 for core code).
+INFO: [Node] Finished "convert", elapsed time 12.69532s.
+INFO: Post-treating /base/bids/sub-ANRB1080/ses-ndm/func/sub-ANRB1080_ses-ndm_task-pines_bold.json file
+INFO: Converting /base/bids/sub-ANRB1080/ses-ndm/func/sub-ANRB1080_ses-ndm_task-pines_sbref (1 DICOMs) -> /base/bids/sub-ANRB1080/ses-ndm/func . Converter: dcm2niix . Output types: ('nii.gz',)
+INFO: [Node] Setting-up "convert" in "/tmp/dcm2niix6946ouif/convert".
+INFO: [Node] Executing "convert" <nipype.interfaces.dcm2nii.Dcm2niix>
+INFO: stdout 2025-02-03T16:52:43.854934:Chris Rorden's dcm2niiX version v1.0.20220720  GCC10.2.1 x86-64 (64-bit Linux)
+INFO: stdout 2025-02-03T16:52:43.854934:Found 1 DICOM file(s)
+INFO: stdout 2025-02-03T16:52:43.854934:Convert 1 DICOM as /base/bids/sub-ANRB1080/ses-ndm/func/sub-ANRB1080_ses-ndm_task-pines_sbref_heudiconv767 (96x96x60x1)
+INFO: stdout 2025-02-03T16:52:44.009841:Compress: "/usr/bin/pigz" -b 960 -n -f -6 "/base/bids/sub-ANRB1080/ses-ndm/func/sub-ANRB1080_ses-ndm_task-pines_sbref_heudiconv767.nii"
+INFO: stdout 2025-02-03T16:52:44.009841:Conversion required 0.177187 seconds (0.022479 for core code).
+INFO: [Node] Finished "convert", elapsed time 0.255866s.
+INFO: Post-treating /base/bids/sub-ANRB1080/ses-ndm/func/sub-ANRB1080_ses-ndm_task-pines_sbref.json file
+INFO: Converting /base/bids/sub-ANRB1080/ses-ndm/fmap/sub-ANRB1080_ses-ndm_magnitude (120 DICOMs) -> /base/bids/sub-ANRB1080/ses-ndm/fmap . Converter: dcm2niix . Output types: ('nii.gz',)
+INFO: [Node] Setting-up "convert" in "/tmp/dcm2niixqjdvds70/convert".
+INFO: [Node] Executing "convert" <nipype.interfaces.dcm2nii.Dcm2niix>
+INFO: stdout 2025-02-03T16:52:44.265512:Chris Rorden's dcm2niiX version v1.0.20220720  GCC10.2.1 x86-64 (64-bit Linux)
+INFO: stdout 2025-02-03T16:52:44.265512:Found 120 DICOM file(s)
+INFO: stdout 2025-02-03T16:52:44.265512:Slices not stacked: echo varies (TE 7.38, 4.92; echo 2, 1). Use 'merge 2D slices' option to force stacking
+INFO: stdout 2025-02-03T16:52:44.265512:Convert 60 DICOM as /base/bids/sub-ANRB1080/ses-ndm/fmap/sub-ANRB1080_ses-ndm_magnitude_heudiconv704_e2 (96x96x60x1)
+INFO: stdout 2025-02-03T16:52:44.441545:Compress: "/usr/bin/pigz" -b 960 -n -f -6 "/base/bids/sub-ANRB1080/ses-ndm/fmap/sub-ANRB1080_ses-ndm_magnitude_heudiconv704_e2.nii"
+INFO: stdout 2025-02-03T16:52:44.441545:Convert 60 DICOM as /base/bids/sub-ANRB1080/ses-ndm/fmap/sub-ANRB1080_ses-ndm_magnitude_heudiconv704_e1 (96x96x60x1)
+INFO: stdout 2025-02-03T16:52:44.607435:Compress: "/usr/bin/pigz" -b 960 -n -f -6 "/base/bids/sub-ANRB1080/ses-ndm/fmap/sub-ANRB1080_ses-ndm_magnitude_heudiconv704_e1.nii"
+INFO: stdout 2025-02-03T16:52:44.607435:Conversion required 0.441663 seconds (0.072799 for core code).
+INFO: [Node] Finished "convert", elapsed time 0.516062s.
+WARNING: For now not embedding BIDS and info generated .nii.gz itself since sequence produced multiple files
+INFO: Converting /base/bids/sub-ANRB1080/ses-ndm/fmap/sub-ANRB1080_ses-ndm_phasediff (60 DICOMs) -> /base/bids/sub-ANRB1080/ses-ndm/fmap . Converter: dcm2niix . Output types: ('nii.gz',)
+INFO: [Node] Setting-up "convert" in "/tmp/dcm2niixzq_8zyan/convert".
+INFO: [Node] Executing "convert" <nipype.interfaces.dcm2nii.Dcm2niix>
+INFO: stdout 2025-02-03T16:52:44.813367:Chris Rorden's dcm2niiX version v1.0.20220720  GCC10.2.1 x86-64 (64-bit Linux)
+INFO: stdout 2025-02-03T16:52:44.813367:Found 60 DICOM file(s)
+INFO: stdout 2025-02-03T16:52:44.813367:Convert 60 DICOM as /base/bids/sub-ANRB1080/ses-ndm/fmap/sub-ANRB1080_ses-ndm_phasediff_heudiconv897_e2_ph (96x96x60x1)
+INFO: stdout 2025-02-03T16:52:44.930400:Compress: "/usr/bin/pigz" -b 960 -n -f -6 "/base/bids/sub-ANRB1080/ses-ndm/fmap/sub-ANRB1080_ses-ndm_phasediff_heudiconv897_e2_ph.nii"
+INFO: stdout 2025-02-03T16:52:44.930400:Conversion required 0.172372 seconds (0.038113 for core code).
+INFO: [Node] Finished "convert", elapsed time 0.249182s.
+INFO: Post-treating /base/bids/sub-ANRB1080/ses-ndm/fmap/sub-ANRB1080_ses-ndm_phasediff.json file
+INFO: Converting /base/bids/sub-ANRB1080/ses-ndm/anat/sub-ANRB1080_ses-ndm_T1w (176 DICOMs) -> /base/bids/sub-ANRB1080/ses-ndm/anat . Converter: dcm2niix . Output types: ('nii.gz',)
+INFO: [Node] Setting-up "convert" in "/tmp/dcm2niixfqoe_dcq/convert".
+INFO: [Node] Executing "convert" <nipype.interfaces.dcm2nii.Dcm2niix>
+INFO: stdout 2025-02-03T16:52:45.286273:Chris Rorden's dcm2niiX version v1.0.20220720  GCC10.2.1 x86-64 (64-bit Linux)
+INFO: stdout 2025-02-03T16:52:45.286273:Found 176 DICOM file(s)
+INFO: stdout 2025-02-03T16:52:45.286273:Convert 176 DICOM as /base/bids/sub-ANRB1080/ses-ndm/anat/sub-ANRB1080_ses-ndm_T1w_heudiconv137 (256x256x176x1)
+INFO: stdout 2025-02-03T16:52:46.391895:Compress: "/usr/bin/pigz" -b 960 -n -f -6 "/base/bids/sub-ANRB1080/ses-ndm/anat/sub-ANRB1080_ses-ndm_T1w_heudiconv137.nii"
+INFO: stdout 2025-02-03T16:52:46.391895:Conversion required 1.272321 seconds (0.538519 for core code).
+INFO: [Node] Finished "convert", elapsed time 1.345768s.
+INFO: Post-treating /base/bids/sub-ANRB1080/ses-ndm/anat/sub-ANRB1080_ses-ndm_T1w.json file
+INFO: Populating template files under /base/bids/
+INFO: PROCESSING DONE: {'subject': 'ANRB1080', 'outdir': '/base/bids/', 'session': 'ndm'}

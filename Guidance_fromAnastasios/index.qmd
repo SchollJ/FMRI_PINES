@@ -1,0 +1,62 @@
+---
+title: "Notes on (f)MRI analysis"
+author: "Anastasios Dadiotis"
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+---
+
+# Introduction
+
+This is a collection of notes on (f)MRI analysis. We will try to cover both techincal aspects on how to run an analysis, mainly using CRNL resources and cluster and also some theoretical aspects on how to interpret the results as well as key references. The aim is to have a file that i will keep both my code and notes.
+
+# Things to cover
+
+1.  Downloading data from XNAT using the cluster
+2.  Converting to BIDS format
+3.  MRIQC
+4.  FMRIPrep
+
+TO BE UPDATED
+
+## Intro and Glossary
+
+In this document we will try to build a document on how to visually inspect the MRIQC and fMRIPrep visual outputs.
+
+For this are going to use several resources:
+
+**Main Resource** will be the paper that these notes are attached to --\> ([Provins et al., 2023](zotero://select/library/items/KSI3K2X5))
+
+**But also see:**
+
+-   <https://www.youtube.com/watch?v=In6Dez_uuxQ&t=1s> --\> video toturial on youtube on how to set up and interpret fmriqc by Matt Defenderfer of UAB research computing
+
+-   <https://sarenseeley.github.io/BIDS-fmriprep-MRIQC.html#Usage30> --\> Very helpful and well structured notes (main inspiration for this document) from Saren Seeley on BIDS, FMRIQC and fmriprep
+
+-   <https://docs.google.com/document/d/1TE6ZWzNg8cDpvL4Vu0VGOZQLXkQ88Fa59AORzN01Avk/edit> --\> google doc produced by Saren Seeley on how to read fmriprep output with the contribution of Oscar Esteban
+
+-   ([Provins et al., 2022](zotero://select/library/items/BEMZKYK7)) --\> interpretation of the extended carpet plot in fmriprep and fmriqc + corresponding nuisance regressor
+
+### Quality assessment (QA):
+
+-   Focuses on ensuring the research workflow produces data of “sufficient quality” (e.g identifying a structures artifact caused by an environmental condition that can be actioned upon so that **it doesn’t replicate prospectively in future acquisitions).**
+
+### Quality control (QC):
+
+-   **Excludes poor-quality data from the dataset** so that they do not continue through the research workflow and potentially bias the results
+
+--\> QA/QC checkpoints are mostly unstandardized and typically involve the screening of the images one by one.
+
+--\> **Raters:** individual researchers that repeatedly screening data
+
+## Methods
+
+-   Assessing the unprocessed data using the MRIQC visual reports
+
+-   Assess the results with minimal preprocessing using hte fMRIPrep visual reports.
+
+### Assessment of quality aspects and exclusion criteria
+
+-   All based on the visual inspection of the individual MRIQCC and fMRIPrep eports, so they are all qualitative.

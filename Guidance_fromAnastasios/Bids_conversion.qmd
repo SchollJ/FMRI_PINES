@@ -1,0 +1,511 @@
+---
+title: "Bids Conversion"
+author: "Anastasios Dadiotis"
+editor: visual
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+---
+
+# Introduction
+
+This document is a step-by-step guide on how to convert raw data from a study to [BIDS](https://bids.neuroimaging.io/) format.[^1] The tool that is used here is [HeuDiConv](https://neuroimaging-core-docs.readthedocs.io/en/latest/pages/heudiconv.html). The data used in this example is from the Tiger study and already downloaded from xnat (see - add link when right this thing). The data are in a dicom format. Running HeuDiConv is a 3 step procedure. Note that this procedure takes place to the crnl cluster so this code is to be used with the cluster terminal and slurm. Most of the code is written in bash, but there are some python scripts that needs to be modified manually for the Bids conversion.
+
+[^1]: For an excellent tutorial for Bids conversion [see](https://sarenseeley.github.io/BIDS-fmriprep-MRIQC.html).
+
+Comment - Jacqueline Scholl: I've adapted the paths for PINES.
+
+# Bids Conversion
+
+## Setup
+
+In this preliminary step we setup and define our variables. 
+
+Command for moving files to crnldata after preprocessing:
+p rsync -av --progress /mnt/data/anastasios_d/Tiger/data/bids /crnldata/psyr2/Anastasios/Tiger_fmri/Tiger/data/
+
+``` bash
+# Standard variable for the PINES study
+# change this to the subject you are working on
+WD=/mnt/data/JacquelineScholl
+my_study=PINES
+session_name=ndm
+subject=ANRB1080
+```
+
+JS: to inspect the value of a variable in the terminal: echo \${subject}
+
+JS: have a look in step1_heudiconv.sh to see what the script assumes about the organization of files.
+
+## \[Step 0\]
+
+To be done as script: Get the files into the right format expected by heudiconv.sh To be done as script: create files .tsv and .json
+
+From Gaelle's tutorial:
+
+3 text files TO BE COMPLETED for metadata
+
+file N°1: participants.tsv 1
+
+compulsory column is participant_id that consists of sub-<label> Optional typical columns are age, sex, and handedness. Check the specification: <https://bids-specification.readthedocs.io/en/stable/03-modality-agnostic-files.html#participants-file>
+
+/mnt/data/soft/sublime ${WD}/${my_study}/data/participants.tsv
+
+file N°2: participants.json
+
+It is RECOMMENDED to accompany each participants.tsv file with a sidecar .json file /mnt/data/soft/sublime ${WD}/${my_study}/data/participants.json
+
+file N°3: dataset_description.json
+
+Check the specification: <https://bids-specification.readthedocs.io/en/stable/03-modality-agnostic-files.html#dataset_description.json> /mnt/data/soft/sublime ${WD}/${my_study}/data/dataset_description.json \#
+
+``` bash
+# Original code from Gaelle which did not work on my mac terminal
+/mnt/data/soft/sublime ${WD}/${my_study}/data/participants.tsv
+/mnt/data/soft/sublime ${WD}/${my_study}/data/participants.json
+
+#Instead we can use nano
+cd ${WD}/${my_study}/data
+nano particpants.tsv # then click through all the options to create the file
+nano participants.json # again click through to create the file
+nano dataset_description.json # again the same
+```
+
+## [Step 1](https://neuroimaging-core-docs.readthedocs.io/en/latest/pages/heudiconv.html#heudiconv-step1): Generate a heuristic.py file.
+
+By passing some path information and flags to HeuDiConv, you generate a heuristic (translation) file skeleton and some associated descriptor text files. These all get placed in a **hidden** directory, .heudiconv under the bids/derivatives directory.
+
+``` bash
+cd ${WD}/${my_study}/code
+sbatch step1_heudiconv.sh ${subject} ${session_name} ${WD} ${my_study} 
+squeue
+```
+
+JS: I had lots of issues here. It turns out that with the new cluster, your data and code need to be on /mnt/data. Note that space on /mnt/data is very tight, so we will delete the raw dicoms again after having finished the BIDS conversion (and just store them on crnldata). Here is my setup for running the code:
+- visual studio installed on my computer with a remote tunnel to the cluster to modify my scripts
+- logging in via jupyterhub (created an ssh key for log in without having to type password)
+- using the desktop for copying files/easier inspecting of files
+- using the terminal (via jupyterhub) for running commands
+
+
+
+To check that it worked the out_step1\_\*.log file should have finished with exit code 0. Also, go to the /mnt/data/JacquelineScholl/PINES/data/bids/derivatives/.heudiconv/{subject}/info were 5 files should be created.
+
+Note that this is a **hidden** directory. To see it you need to type `ls -a` in the terminal. The file that we need for the next step is the dicominfo.tsv file.
+
+This step takes around 15 to 20 minutes to finish [JS: for me it was more like 1 min, maybe depends on how many folders/files you have? for PINES the task is only 12 min].
+
+## [Step 2](https://neuroimaging-core-docs.readthedocs.io/en/latest/pages/heudiconv.html#heudiconv-step2): Modify the heuristic.py file
+
+You will modify the heuristic.py to specify BIDS output names and directories, and the input DICOM characteristics. Available input DICOM characteristics are listed in /.heudiconv/info/dicominfo.tsv.
+
+JS: This is now in /mnt/data/JacquelineScholl/PINES/code/heuristic.py  . I have create this looking at the file for Anastasios' Tiger study in the following path: /crnldata/psyr2/Anastasios/Tiger_fmri/Tiger/code/heuristic.py. 
+
+This is the one you should modify based on the dicominfo.tsv file of the specific subject. JS: I think I don't want to adjust this for each person, but be able to use it in a loop. Therefore I will use > instead of = where I'm unsure. E.g. structural and fieldmaps should always be the same size. I imagine the functional depends on participants' time to complete the task.
+
+The template is almost ready. What you should modify are the following lines:
+1.  Line 119 s.dim == XXXX
+2.  Line 123 s.dim == XXXX
+3.  Line 127 s.dim == XXXX
+
+
+The rest should remain the shame. At the end of this page there is the the heuristic.py file for inspection if nececarry.
+
+## [Step 3](https://neuroimaging-core-docs.readthedocs.io/en/latest/pages/heudiconv.html#heudiconv-step3): Run HeuDiConv
+
+Now that the heuristic.py file is ready we can run the HeuDiConv. Each time you run it, additional subdirectories are created under .heudiconv that record the details of each subject (and session) conversion. Detailed provenance information is retained in the .heudiconv hidden directory. The following code is to be run in the terminal.
+
+``` bash
+cd ${WD}/${my_study}/code
+chmod -R 770 .
+sbatch step3_heudiconv.sh ${subject} ${session_name} ${WD} ${my_study}
+squeue
+```
+
+JS: This should produce the folders: 
+- func
+- anat 
+- fmap (in this one both the phase and the magnitude images)
+
+JS: Note that I had quite a few problems with this - if you run the function once with a mistake (typo) in heuristic.py, you need to make sure to delete everything, not just the results. Specifically, I think there must be some hidden files somewhere that I can't see - it works if you delete the WHOLE bids folder (recreate it and 'derivatves' within it) and then run again from step 1
+Code from Anastasios for deleting:  find /mnt/data/anastasios_d/Tiger/data/bids -name '._*' -delete 
+
+# Bids Validation
+
+After the conversion is done, it is important to validate the Bids format. This is done by using the [BIDS validator](https://bids-standard.github.io/bids-validator/). For this, make sure to select the whole Bids folder, not an individual subject/session (a required file in the root folder is dataset_description)
+
+# Scripts
+
+## step1_heudiconv.sh
+
+``` {.bash filename="step1_heudiconv.sh" code-line-numbers="true" code-fold="true"}
+#!/bin/bash
+
+###############################
+### Original script from Arnaud Fournel, PhD, NeuroPop team, CRNL, Lyon
+### arnaud.fournel @ inserm.fr
+### 
+### Adapted for the CRNL study
+### by Gaelle Leroux, PhD
+### and Isabelle Faillenot, PhD
+###
+### Autumn 2020, Lyon
+### gaelle.leroux @ cnrs.fr
+###
+### launched by: sbatch step1_heudiconv.sh ${subject} ${session_name} ${WD} ${my_study}
+###
+###############################
+#
+### The SBATCH directives (line 39 to be revised only):
+
+### Your job name displayed by the queue
+### use "squeue" command in a terminal to see it
+#SBATCH --job-name=HeuDC_1
+
+### Specify output and error files
+### %A for job array's master job allocation number
+### or %a for job array ID (index) number
+#SBATCH --output=out_step1_%A.log
+#SBATCH --error=err_step1_%A.log
+
+### Specify the number of tasks, CPU per task and buffer size to be used 
+### (up to 4 CPU/task to reach optimal power)
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=10G
+
+### The size of the participant table to be run
+###SBATCH --array=1-1
+
+### If you want to launch your script on a specific node of the cluser
+### If yes, uncomment the appropirate line(s) 
+###SBATCH --exclude=node9
+###SBATCH --nodelist=node10
+
+# End of the SBATCH directives
+###############################
+#
+# Paths of the study
+subject=$1
+session_name=$2
+WD=$3
+my_study=$4
+STUDY=${WD}/${my_study}
+DATA_DIRECTORY="${STUDY}/data"
+#
+HEUDICONV_SINGULARITY_IMG="/mnt/data/soft/Images/heudiconv_1.1.0.sif"
+#
+## Comment: Parse the participants.tsv file and extract one subject ID from the line corresponding to this SLURM task.
+## Comment: 1 line below to uncomment if you want to launch the script for all the subjects listed in ${DATA_DIRECTORY}/participants.tsv
+#subject=$( sed -n -E "$((${SLURM_ARRAY_TASK_ID} + 1))s/sub-(\S*)\>.*/\1/gp" ${DATA_DIRECTORY}/participants.tsv )
+#
+# To be printed in the out_*.log file :
+echo "#########################################################################"
+echo "User:" $USER
+echo "#"
+echo "SLURM_SUBMITING_DIRECTORY:" $SLURM_SUBMIT_DIR
+echo "SLURM_JOB_NODELIST:" $SLURM_NODELIST
+echo "SLURM_JOB_NAME:" $SLURM_JOB_NAME
+echo "SLURM_JOB_ID:" $SLURM_JOBID
+echo "SLURM_ARRAY_TASK_ID:" $SLURM_ARRAY_TASK_ID
+echo "SLURM_NTASKS:" $SLURM_NTASKS
+echo "#"
+echo "Step 1: generation of text files using HeuDiConv"
+echo "#"
+echo "Subject processed:" ${subject}
+echo "Session processed:" ${session_name}
+echo "#"
+echo "Job STARTED @ $(date)"
+echo "#"
+#
+# STEP 1/3: generate heuristic file based on a template file + 4 other text files
+# Submission to slurm and running the HeuDiConv singularity image
+#
+# Check the "-d" path (line 83) pointing at the dicom files
+#
+# Compose the command line
+cmd="srun singularity run \
+    --cleanenv \
+    -B ${DATA_DIRECTORY}:/base \
+    ${HEUDICONV_SINGULARITY_IMG} \
+    -d /base/dicom/{subject}/{session}/scans/*/resources/DICOM/files/*.??? \
+    -s ${subject} \
+    --ses ${session_name} \
+    -f convertall \
+    -c none \
+    -o /base/bids/derivatives \
+    --overwrite"
+#
+# Setup done, run the command
+echo Running task ${SLURM_ARRAY_TASK_ID}
+echo "Command line used (example of the last subject processed)"
+echo $cmd
+#
+echo "#"
+#
+eval $cmd
+exitcode=$?
+#
+echo "#"
+echo "Job STOPPED @ $(date)"
+echo "#"
+echo "If STEP 1 successful: 5 text files were generated in" ${STUDY}"/data/bids/derivatives/.heudiconv/"$1"/info"
+echo "#"
+echo "Now, STEP 2: edit the empty file heuristitic.py just created and copy/paste it to" ${STUDY}"/code"
+echo "#"
+echo "An example of heuristic file for a study@primage is provided in" ${STUDY}"/code/heuristic_templates/heuristic.py"
+echo "#########################################################################"
+echo "#"
+# For your information about step 2:
+# The heuristic file controls how information about the dicoms is used to convert to a file system layout (e.g., BIDS). 
+# This is a python file that must have the function infotodict, which takes a single argument seqinfo.
+#
+# Output results to a table
+echo "sub-$subject  ${SLURM_ARRAY_TASK_ID} $exitcode" >> ${SLURM_JOB_NAME}.step1.${SLURM_ARRAY_JOB_ID}.tsv
+echo Finished tasks ${SLURM_ARRAY_TASK_ID} with exit code $exitcode
+exit $exitcode
+```
+
+## heuristic.py
+
+``` {.python filename="heuristic.py" code-line-numbers="true" code-fold="true"}
+from __future__ import annotations
+
+import logging
+from typing import Optional
+
+from heudiconv.utils import SeqInfo
+
+lgr = logging.getLogger("heudiconv")
+
+
+def create_key(
+    template: Optional[str],
+    outtype: tuple[str, ...] = ("nii.gz",),
+    annotation_classes: None = None,
+) -> tuple[str, tuple[str, ...], None]:
+    if template is None or not template:
+        raise ValueError("Template must be a valid format string")
+    return (template, outtype, annotation_classes)
+
+
+def infotodict(
+    seqinfo: list[SeqInfo],
+) -> dict[tuple[str, tuple[str, ...], None], list[str]]:
+    """Heuristic evaluator for determining which runs belong where
+
+    allowed template fields - follow python string module:
+
+    item: index within category
+    subject: participant id
+    seqitem: run number during scanning
+    subindex: sub index within group
+    """
+
+    data = create_key("run{item:03d}")
+
+    # Anatomical images
+    # Structural scans (anat specification): MUST end with "T1w" or "T2w" or "FLAIR" or "T1map"...
+    # list: https://bids-specification.readthedocs.io/en/stable/04-modality-specific-files/01-magnetic-resonance-imaging-data.html#anatomy-imaging-data
+    t1w = create_key('sub-{subject}/{session}/anat/sub-{subject}_{session}_T1w')
+    
+    # field maps (fmap specification): the file name must end with "magnitude" or "phasediff" and include the {subject}
+    # specifications: https://bids-specification.readthedocs.io/en/stable/04-modality-specific-files/01-magnetic-resonance-imaging-data.html#fieldmap-data
+    fmap_magn = create_key('sub-{subject}/{session}/fmap/sub-{subject}_{session}_magnitude')
+    fmap_phase = create_key('sub-{subject}/{session}/fmap/sub-{subject}_{session}_phasediff')
+
+    # Functional images
+    # Tasks, including movies (func specification): MUST contain "task-" in the name + "bold" or "sbref" or "cbv" or "phase" at the end
+    # list: https://bids-specification.readthedocs.io/en/stable/04-modality-specific-files/01-magnetic-resonance-imaging-data.html#task-including-resting-state-imaging-data
+    func_PINES = create_key('sub-{subject}/{session}/func/sub-{subject}_{session}_task-pines_bold')
+    func_PINES_sbref = create_key('sub-{subject}/{session}/func/sub-{subject}_{session}_task-pines_sbref')
+
+    info: dict[tuple[str, tuple[str, ...], None], list[str]] = {data: [],
+                                                                func_PINES: [],
+                                                                func_PINES_sbref: [],
+                                                                fmap_magn: [],
+                                                                fmap_phase: [],
+                                                                t1w: []
+                                                                }
+
+    for s in seqinfo:
+        """
+        The namedtuple `s` contains the following fields:
+
+        * total_files_till_now
+        * example_dcm_file
+        * series_id
+        * dcm_dir_name
+        * unspecified2
+        * unspecified3
+        * dim1
+        * dim2
+        * dim3
+        * dim4
+        * TR
+        * TE
+        * protocol_name
+        * is_motion_corrected
+        * is_derived
+        * patient_id
+        * study_description
+        * referring_physician_name
+        * series_description
+        * image_type
+        """
+
+        
+        if ("pines" in s.protocol_name) and (s.dim4 == 1) :
+            info[func_PINES_sbref].append(s.series_id)
+        if ("pines" in s.protocol_name) and (s.dim4 > 100 ) :
+            info[func_PINES].append(s.series_id)
+        if ("fmap" in s.protocol_name) and (s.dim3 == 120) :
+            info[fmap_magn].append(s.series_id)
+        if ("fmap" in s.protocol_name) and (s.dim3 == 60) :
+            info[fmap_phase].append(s.series_id)
+        if ("T1w" in s.protocol_name) :
+            info[t1w].append(s.series_id)
+
+
+
+        #info[data].append(s.series_id)
+    return info
+
+```
+
+## step3_heudiconv.sh
+
+``` {.bash filename="step3_heudiconv.sh" code-line-numbers="true" code-fold="true"}
+#!/bin/bash
+
+###############################
+### Original script from Arnaud Fournel, PhD, NeuroPop team, CRNL, Lyon
+### arnaud.fournel @ inserm.fr
+### 
+### Adapted for the CRNL study
+### by Gaelle Leroux, PhD
+### and Isabelle Faillenot, PhD
+###
+### Autumn 2020, Lyon
+### gaelle.leroux @ cnrs.fr
+###
+### launched by: sbatch step3_heudiconv.sh ${subject} ${session_name} ${WD} ${my_study}
+###
+###############################
+#
+### The SBATCH directives (line 39 to be revised only):
+
+### Your job name displayed by the queue
+### use "squeue" command in a terminal to see it
+#SBATCH --job-name=HeuDC_3
+
+### Specify output and error files
+### %A for job array's master job allocation number.
+### or %a for job array ID (index) number
+#SBATCH --output=out_step3_%A.log
+#SBATCH --error=err_step3_%A.log
+
+### Specify the number of tasks, CPU per task and buffer size to be used
+### (up to 4 CPU/task to reach optimal power)
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=10G
+
+### Send email for which step: NONE, BEGIN, END, FAIL, REQUEUE, ALL
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=${firstName}.${lastName}@univ-lyon1.fr
+
+### The size of the participant table to be run
+### SBATCH --array=1-1
+
+### If you want to launch your script on a specific node of the cluser
+### If yes, uncomment the appropirate line(s) 
+###SBATCH --exclude=node9
+###SBATCH --nodelist=node10
+
+# End of the SBATCH directives
+###############################
+#
+# Paths of the study
+subject=$1
+session_name=$2
+WD=$3
+my_study=$4
+STUDY=${WD}/${my_study}
+DATA_DIRECTORY="${STUDY}/data"
+rm ${STUDY}/data/bids/${subject}/${session_name}/.heudiconv/*.edit.txt
+#
+HEUDICONV_SINGULARITY_IMG="/mnt/data/soft/Images/heudiconv_1.1.0.sif"
+#
+## Comment: Parse the participants.tsv file and extract one subject ID from the line corresponding to this SLURM task.
+## Comment: 1 line below to uncomment if you want to launch the script for all the subjects listed in ${DATA_DIRECTORY}/participants.tsv
+#subject=$( sed -n -E "$((${SLURM_ARRAY_TASK_ID} + 1))s/sub-(\S*)\>.*/\1/gp" ${DATA_DIRECTORY}/participants.tsv )
+#
+# To be printed in the out_*.log file :
+echo "#########################################################################"
+echo "User:" $USER
+echo "#"
+echo "SLURM_SUBMITING_DIRECTORY:" $SLURM_SUBMIT_DIR
+echo "SLURM_JOB_NODELIST:" $SLURM_NODELIST
+echo "SLURM_JOB_NAME:" $SLURM_JOB_NAME
+echo "SLURM_JOB_ID:" $SLURM_JOBID
+echo "SLURM_ARRAY_TASK_ID:" $SLURM_ARRAY_TASK_ID
+echo "SLURM_NTASKS:" $SLURM_NTASKS
+echo "#"
+echo "Step 3: conversion of DICOM to NIFTI with BIDS standards using HeuDiConv"
+echo "#"
+echo "Subject processed:" ${subject}
+echo "Session processed:" ${session_name}
+echo "#"
+echo "Job STARTED @ $(date)"heuristic.py
+echo "#"
+#
+# STEP 3/3: conversion of DICOM to NIFTII using dcm2niix and to a BIDS standard organisation
+# submission to slurm and running the HeuDiCon singularity image
+#
+# Check the "-d" path (line 87) pointing at the dicom files
+#
+# Compose the command line
+cmd="srun singularity run \
+    --cleanenv \
+    -B ${DATA_DIRECTORY}:/base -B ${STUDY}:/study \
+    ${HEUDICONV_SINGULARITY_IMG} \
+    -d /base/dicom/{subject}/{session}/scans/*/resources/DICOM/files/*.??? \
+    -s ${subject} \
+    --ses ${session_name} \
+    -f /study/code/heuristic.py \
+    -c dcm2niix -b \
+    -o /base/bids \
+    --minmeta \
+    --overwrite"
+#
+# Setup done, run the command
+echo Running task ${SLURM_ARRAY_TASK_ID}
+echo "Command line used (example of the last subject processed)"
+echo $cmd
+#
+echo "#"
+#
+eval $cmd
+exitcode=$?
+#
+echo "#"
+echo "Job STOPPED @ $(date)"
+echo "#"
+echo "If STEP 3 successful: check the text files & folders (.heudiconv and sub-{$1}) in" 
+echo ${DATA_DIRECTORY}"/bids"
+echo "Edit the file" ${DATA_DIRECTORY}"/dataset_description.json"
+echo "Create events.tsv file for each func/*.json file"
+echo "#"
+echo "Then, validate your nifti folder using online BIDS VALIDATOR: https://bids-standard.github.io/bids-validator/"
+echo "############################################################################################"
+echo "#"
+# Output results to a table
+echo "sub-${subject}    ${SLURM_ARRAY_TASK_ID}  $exitcode" >> ${SLURM_JOB_NAME}.step3.${SLURM_ARRAY_JOB_ID}.tsv
+echo Finished tasks ${SLURM_ARRAY_TASK_ID} with exit code $exitcode
+exit $exitcode
+```

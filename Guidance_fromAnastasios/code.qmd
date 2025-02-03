@@ -1,0 +1,24 @@
+---
+title: "Analysis overview"
+author: "Anastasios Dadiotis"
+editor: visual
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+---
+
+# Intro
+
+This section will have the code for doing all the steps in the analysis.
+
+Possible way to divide this section is in the following steps:
+
+1\. Preprocessing + checks (MRIQC, fMRIPrep) Probably the cleanest way is to have guides and bash scripts fully visible each step (for easy copy pasting) but also have the python scripts in chunks that are folded, in case i want to inspect them.
+
+2\. First level analysis (FSL)
+
+3\. Second level analysis (FSL)
+
+Other stuff that could be included: - My notes on how to use the HPC

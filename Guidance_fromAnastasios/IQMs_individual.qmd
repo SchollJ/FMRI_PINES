@@ -1,0 +1,204 @@
+---
+title: "Image Quality Metrics Individual level"
+author: "Anastasios Dadiotis"
+editor: visual
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+    code_evaluate: false
+---
+
+# Introduction
+
+Based on the email exchange with Jerome Prado and Charlotte Constant, we can use the following [toolbox](https://github.com/elizabethbeard/mriqception) to set a threshold for IQMs of interest \[median ± 2.5 x (75% quartile-25% quartile)\] that we calculate with API data and then compare it to IQMs of the participants. They did that to group level, but after discussing with Charlotte we can do it to individual level as well.
+
+The only obstacle is that in the group level there is a .csv file with the IQMs, but in the individual level we have to extract the IQMs from the html file.
+
+# IQMs extraction
+
+Python code to extract the IQMs from the html file:
+
+This script can be found in the followig path: /Volumes/psyr2/Anastasios/Tiger_fmri/Tiger/code/mriqc_html_checks.py
+
+For more information on how to run the script, see the script documentation.
+
+``` {.python filename="mriqc_html_checks.py"}
+#!/usr/bin/env python3
+
+"""
+Title: Check MRIQC HTML files metrics checks
+Author: Anastasios Dadiotis
+Date created: 18/04/2024
+Date last modified: 18/04/2024
+Python Version: 3.9
+"""
+"""
+This script will check the MRIQC HTML files for the metrics checks. It will extract the data from the tables and check if the values are 
+within the expected range. 
+If the values are within the expected range, it will update the Checks.csv file with the results. 
+If the values are not within the expected range, it will write the results to a file for further investigation.
+It can be used as main script or as a module to be imported in other scripts.
+If run as a main script, it will take the working directory, the study name and the subject ID as arguments.
+"""
+
+import os 
+from bs4 import BeautifulSoup
+import sys
+import lxml.html as html
+import pandas as pd
+import html5lib
+
+# =============================================================================
+# Helper functions
+# =============================================================================
+
+def load_and_parse_html(file_path):
+    """
+    Load and parse an HTML file.
+    
+    Parameters
+    ----------
+    file_path : str
+        The path to the HTML file.
+        
+    Returns
+    -------
+    BeautifulSoup object
+        The parsed HTML content.
+    
+    Raises
+    ------
+    Exception
+        If an error occurs while processing the file.
+    """
+    try:
+        with open(file_path, 'r') as file:
+            html_content = file.read()
+        soup = BeautifulSoup(html_content, 'lxml')
+        return soup
+    except Exception as e:
+        print(f"An error occurred while processing{file_path}: {e}")
+        return None
+
+def extract_table_data(soup, table_id):
+    """
+    Extract data from a table in an HTML file.
+    
+    Parameters
+    ----------
+    soup : BeautifulSoup object
+        The parsed HTML content.
+    table_id : str
+        The id of the table to extract the data from.
+        
+    Returns
+    -------
+    list
+        A list of lists containing the data from the table.
+
+    Raises
+    ------
+    Exception
+        If an error occurs while extracting data from the table.
+
+    Notes: if the table is not found, the function will return an empty list.
+    """
+    try:
+        table = soup.find('table', id=table_id)
+        # Initialize an empty list to store your data
+        data = []
+        # Check if the table was found
+        if table:
+            rows = table.find_all('tr')
+            for row in rows:
+                cols = [td.get_text(strip=True) for td in row.find_all('td')]
+                if cols:
+                    data.append(cols)
+        return data
+    except Exception as e:
+        print(f"An error occurred while extracting data from the table: {e}")
+        return None
+    
+
+def df_from_list(table_list):
+    """
+    Create a pandas DataFrame from a list of lists extracted from an HTML table. IF subtitles are missing, they will be added as empty strings.
+    
+    Parameters
+    ----------
+    table_list : list
+        A list of lists containing the data to be converted to a DataFrame.
+        
+    Returns
+    -------
+    pandas.DataFrame
+        A DataFrame containing the data from the list of lists.
+    """
+
+    for list in table_list:
+        if len(list) == 2:
+            list.insert(1, "")
+            list.insert(2, "")
+        elif len(list) == 3:
+            list.insert(2, "")
+        elif len(list) == 4:
+            continue
+        else:
+            print("Error in the table")
+            break
+
+
+    # Create a pandas DataFrame from the table data
+    df = pd.DataFrame(table_list, columns=['Metric', 'Subtitle_1', 'Subtitle_2', 'Value'])
+    return df
+
+
+# =============================================================================
+# Variable definitions
+# To be replaced with sys.argv later
+# =============================================================================
+
+# Define the directory path
+# will use sys.argv for those variables later
+WD="/crnldata/psyr2/Anastasios/Tiger_fmri"
+my_study="Tiger"
+subject="CO1"
+
+# Build the path to the mriqc html files
+directory_path = f'/Volumes/{WD}/{my_study}/data/bids/derivatives/mriqc' # NOTE: Volumes to be removed to run on the server!!!
+
+
+# =============================================================================
+# Main script
+# =============================================================================
+
+# get all the files in the directory to be able to loop through them later NOTE: to do after everything is working fine
+
+file = "sub-CO1_ses-S01_task-BigBuckBunny_echo-1_bold.html" # just for testing, will not be hardcoded in the final version
+
+filepath = f'{directory_path}/{file}'
+
+
+# Load and parse the HTML file
+soup = load_and_parse_html(filepath)
+
+table_list_test = extract_table_data(soup, 'about-metadata-table-2')
+
+# to be removed after testing
+print(table_list_test)
+
+df_test = df_from_list(table_list_test)
+
+# to be removed after testing
+print(df_test)
+
+# TODO: Go over the metrics and check if they are within the expected range, if yes update the Checks.csv file with the results
+# if not write the results to a file for further investigation 
+```
+
+# ToDO
+
+-   [ ] Find the expected range for each metric from the API data given our parameters
+-   [ ] Implement that on the above scripts and add checks

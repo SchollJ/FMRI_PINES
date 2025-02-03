@@ -1,0 +1,7 @@
+INFO: Running heudiconv version 1.1.6 latest 1.3.2
+INFO: Need to process 1 study sessions
+INFO: PROCESSING STARTS: {'subject': 'ANRB1080', 'outdir': '/base/bids/derivatives/', 'session': 'ndm'}
+INFO: Processing 1134 dicoms
+INFO: Analyzing 1134 dicoms
+INFO: Generated sequence info for 13 studies with 1134 entries total
+INFO: PROCESSING DONE: {'subject': 'ANRB1080', 'outdir': '/base/bids/derivatives/', 'session': 'ndm'}

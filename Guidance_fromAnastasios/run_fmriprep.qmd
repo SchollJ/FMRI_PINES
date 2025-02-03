@@ -1,0 +1,284 @@
+---
+title: "Run fmriprep in CRNL cluster"
+author: "Anastasios Dadiotis"
+editor: visual
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+---
+
+# Set up 
+In this preliminary step we setup and define our variables. Note from the code below, change the variable “subject” to the subject you are working on. The Tiger notation is C for controls and G for Gamblers, e.g. for the first control subject the notation is C01 and for the first gambler G01. The following procedure is to submit the job for one subject. (to be updated for more).
+
+``` bash
+# Standard variable for the Tiger study
+WD=/crnldata/psyr2/Anastasios/Tiger_fmri
+my_study=Tiger
+session_name=S01
+
+# change this to the subject you are working on
+subject=XXX 
+```
+
+# Submit the job
+
+Run the following code to submit the job to the cluster. This is for one subject only. There are scripts for multiple subjects via Slurm array jobs. (To be updated)
+
+Need step3 (see Bids) to be done ; mriqc is optional. To use fmap to make SDC, json files of fmap have to be change. See comment in step5_fmriprep.sh
+
+``` bash
+# Modify the 3 *.son files in the fmap directory
+
+# To add the "IntendedFor" field in the json files of the fieldmaps run the following command
+chmod -R 770 /crnldata/psyr2/Anastasios/Tiger_fmri/Tiger/data/bids/${subject}/ses-S01/fmap/ # This is extremelly important to have the right to write in the directory
+
+
+cd ${WD}/${my_study}/code
+python3 add_IntendedFor_Fieldmaps.py ${subject} # it is a very light job so i will run it in the frontal node instead of assigning it to other nodes. 
+
+
+# Submit the job for one subject (to launch the job for a list of subjects, see the optional section at the end of this tutorial)
+cd ${WD}/${my_study}/code
+chmod -R 770 .
+chmod -R 770 ${WD}/${my_study}/data/bids/derivatives
+chmod -R 770 ${WD}/${my_study}/data/bids/derivatives/freesurfer-7.1.1 # to check 
+
+cd ${WD}/${my_study}/code
+sbatch step5_fmriprep.sh ${subject} ${session_name} ${WD} ${my_study}
+```
+
+# Scripts
+
+### fmriprep
+
+``` {.bash filename="step5_fmriprep.sh" code-line-numbers="true" code-fold="true"}
+#!/bin/bash
+
+#################################################
+### Original script from Arnaud Fournel, PhD, NeuroPop team, CRNL, Lyon
+### arnaud.fournel @ inserm.fr
+### and from 
+### https://fmriprep.org/en/stable/singularity.html#running-singularity-on-a-slurm-system
+### 
+### Adapted for the CRNL 
+### by Gaelle Leroux, PhD
+### and Isabelle Faillenot, PhD
+###
+### Fall 2020, Lyon
+### gaelle.leroux @ cnrs.fr
+###
+### launched by: sbatch step5_fmriprep.sh ${subject} ${session_name} ${WD} ${my_study}
+###
+###############################
+#
+### The SBATCH directives (line 40 to be revised only):
+
+### Your job name displayed by the queue
+### use squeue command in a terminal to see it
+#SBATCH --job-name=fmriPrep
+
+### Specify output and error files
+### %A for job array's master job allocation number
+### or %a for job array ID (index) number
+#SBATCH --output=out_fmriPrep_%A.log
+#SBATCH --error=err_fmriPrep_%A.log
+
+### Specify the number of tasks, CPU per task and buffer size to be us
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=16
+### Changed the memory to 100G to avoid the code 137
+#SBATCH --mem=100G
+
+### Send email for which step: NONE, BEGIN, END, FAIL, REQUEUE, ALL
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=${firstName}.${lastName}@univ-lyon1.fr
+
+### The size of the participant table to be run
+###SBATCH --array=1-1
+
+### If you want to launch your script on a specific node of the cluser
+### If yes, uncomment the appropriate line(s) 
+#SBATCH --exclude=node10
+###SBATCH --nodelist=node9
+
+# End of the SBATCH directives
+###############################
+#
+# Paths of the study
+subject=$1
+session_name=$2
+WD=$3
+my_study=$4
+STUDY=${WD}/${my_study}
+DATA_DIRECTORY="${STUDY}/data"
+#
+FMRIPREP_SINGULARITY_IMG="/mnt/data/soft/Images/fmriprep_23.2.1.sif"
+#
+## Comment: Parse the participants.tsv file and extract one subject ID from the line corresponding to this SLURM task.
+## Comment: 1 line below to uncomment if you want to launch the script for all the subjects listed in ${DATA_DIRECTORY}/participants.tsv
+#subject=$( sed -n -E "$((${SLURM_ARRAY_TASK_ID} + 1))s/sub-(\S*)\>.*/\1/gp" ${DATA_DIRECTORY}/participants.tsv )
+#
+# Definition of FreeSurfer env variables
+FREESURFER_HOME=${DATA_DIRECTORY}/bids/derivatives/freesurfer-7.1.1
+SINGULARITYENV_FREESURFER_HOME=${DATA_DIRECTORY}/bids/derivatives/freesurfer-7.1.1
+#
+SUBJECTS_DIR=${DATA_DIRECTORY}/bids/derivatives/freesurfer-7.1.1/subjects
+SINGULARITYENV_SUBJECTS_DIR=${DATA_DIRECTORY}/bids/derivatives/freesurfer-7.1.1/subjects
+#
+FS_LICENSE=${DATA_DIRECTORY}/bids/derivatives/freesurfer-7.1.1/license.txt
+SINGULARITYENV_FS_LICENSE=${DATA_DIRECTORY}/bids/derivatives/freesurfer-7.1.1/license.txt # Tells fMRIPrep the mount point
+#
+LOCAL_FREESURFER_DIR=${DATA_DIRECTORY}/bids/derivatives/freesurfer-7.1.1
+#
+# Prepare some writeable bind-mount points.
+TEMPLATEFLOW_HOME=${HOME}/.cache/templateflow
+SINGULARITYENV_TEMPLATEFLOW_HOME=${HOME}/.cache/templateflow # Tells fMRIPrep the mount point
+FMRIPREP_CACHE=${HOME}/.cache/fmriprep
+SINGULARITYENV_FMRIPREP_CACHE=${HOME}/.cache/fmriprep  # Tells fMRIPrep the mount point
+mkdir -p ${TEMPLATEFLOW_HOME}
+mkdir -p ${FMRIPREP_CACHE}
+mkdir -p ${DATA_DIRECTORY}/codes
+#
+###############################
+# To be printed in the out_fmriPrep_*.log file :
+echo "#########################################################################"
+echo "USER:" $USER
+echo "#"
+echo "SLURM_SUBMITING_DIRECTORY:" $SLURM_SUBMIT_DIR
+echo "SLURM_JOB_NODELIST:" $SLURM_NODELIST
+echo "SLURM_JOB_NAME:" $SLURM_JOB_NAME
+echo "SLURM_JOB_ID:" $SLURM_JOBID
+echo "SLURM_ARRAY_TASK_ID:" $SLURM_ARRAY_TASK_ID
+echo "SLURM_NTASKS:" $SLURM_NTASKS
+echo "#"
+echo "Step 5: fmriPrep is a preprocessing pipeline of fMRI data"
+echo "#"
+echo "Subject processed:" ${subject}
+echo "Session processed:" ${session_name}
+echo "#"
+echo "Job STARTED @ $(date)"
+echo "#"
+#
+# PRE-REQUISTES: a dataset organised according to BIDS standards (using HeuDiConv or another tool).
+# Submission to slurm and running a singularity image fo fmriPrep 
+# Compose the command line
+# options:
+#   --use-aroma  \				to use ICA-aroma to separarte noise from signal (cf prium15)
+#   --use-syn-sdc \				to have SDC but without fmap images
+#   --fd-spike-threshold 0.3 \	to change the FD threshold to calculate motion_outliers (default = 0.5)
+#   --output-spaces MNI152NLin2009cSym:res-1 \	to use a symetric template (available only in a cubic resolution of 1mm)
+# if you have fmap acquisition, and if you want to use them for the SDC : 
+# in the files :data/bids/sub-XX/ses-ZZZ/*magnitude1.json + *magnitude2.json + *_phasediff.json
+# add at the end : 
+# "IntendedFor": ["ses-IRM/func/sub-XX_ses-ZZZ_task-YY_bold.nii.gz",
+#                   "ses-IRM/func/sub-XX_ses-ZZZ_task-YY_bold.nii.gz"]
+#
+cmd="srun singularity run \
+	--cleanenv \
+	--bind ${DATA_DIRECTORY}:/data --bind ${LOCAL_FREESURFER_DIR}:/fsdir \
+	${FMRIPREP_SINGULARITY_IMG} \
+	/data/bids /data/bids/derivatives/fmriprep participant \
+	--participant-label ${subject} \
+	--work-dir /data/codes \
+	--low-mem \
+	--stop-on-first-crash \
+	--write-graph \
+	--fs-license-file /fsdir/license.txt --fs-subjects-dir /fsdir"
+#
+# Setup done, run the command
+echo Running task ${SLURM_ARRAY_TASK_ID}
+echo "Command line used (example of the last subject processed)"
+echo $cmd
+#
+echo "#"
+#
+eval $cmd
+exitcode=$?
+#
+echo "#"
+echo "Job STOPPED @ $(date)"
+echo "#"
+echo "If fmriPrep successful: it is clearly indicated in the out*.log file as" 
+echo "[...] fMRIPrep finished successfully! [...] otherwise, problem(s) occured."
+echo "############################################################################################"
+echo "#"
+# Output results to a table
+# code 137 : raise the --mem SBATCH directive
+echo "sub-${subject}	${SLURM_ARRAY_TASK_ID}	$exitcode" >> ${SLURM_JOB_NAME}.step5.${SLURM_ARRAY_JOB_ID}.tsv
+echo Finished tasks ${SLURM_ARRAY_TASK_ID} with exit code $exitcode
+exit $exitcode
+```
+
+
+### fieldmaps
+
+``` {.python filename="add_IntendedFor_Fieldmaps.py" code-line-numbers="true" code-fold="true"}
+"""
+Title: Script to add IntendedFor field to the json files of the fieldmaps
+Author: Anastasios Dadiotis
+Date created: 15/04/2024
+Date last modified: 15/04/2024
+Description: This script will add the IntendedFor field to the json files of the fieldmaps. The IntendedFor field is a list of the functional images that the fieldmap is intended for. 
+This is recommended for the BIDS format but is necessary to Fieldmap correct within FMRIprep. 
+"""
+"""
+Usage: This script is called from the bash with the following command:
+python add_IntendedFor_Fieldmaps.py ${subject}
+where subject is the participant id.
+Note: Before running the script make sure that you have rights to write in the directory where the json files are located.
+if not, you can change the permissions with the following command:
+chmod -R 770 /path/to/directory
+"""
+
+
+# Import the necessary libraries
+import json
+import os
+import sys
+
+# Participants id from the bash script
+id = sys.argv[1]
+
+# Define the directory path
+#directory_path = f'/Volumes/psyr2/Anastasios/Tiger_fmri/Tiger/data/bids/sub-{id}/ses-S01/fmap'
+directory_path = f'/crnldata/psyr2/Anastasios/Tiger_fmri/Tiger/data/bids/sub-{id}/ses-S01/fmap'
+# load the json files of the fieldmaps
+json_files = [f for f in os.listdir(directory_path) if f.endswith('.json') and "._" not in f]
+
+# create the list of scans for the IntendedFor field
+IntendedFor = []
+tasks = ["BigBuckBunny", "Hariri", "PartlyCloudy", "SkewedGambling"]
+
+# loop over tasks, runs and echoes to create the list of scans for the IntendedFor field
+for task in tasks:
+    if task != "SkewedGambling":
+        for echo in range (1,4):
+            IntendedFor.append(f"ses-S01/func/sub-{id}_ses-S01_task-{task}_echo-{echo}_bold.nii.gz")
+    elif task == "SkewedGambling":
+        for run in range(1,4):
+            for echo in range (1,4):
+                IntendedFor.append(f"ses-S01/func/sub-{id}_ses-S01_task-{task}_run-0{run}_echo-{echo}_bold.nii.gz")
+    else:
+        print("Error in the task name")
+   
+
+    
+# loop over the json files and add the IntendedFor field
+for json_file in json_files:
+    json_file_path = f'{directory_path}/{json_file}'
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
+        data["IntendedFor"] = IntendedFor
+        with open(json_file_path, 'w') as file:
+            json.dump(data, file, indent=4)       
+```
+
+
+
+
+
+
+

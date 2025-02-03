@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>visual-reports-of-fmriprep – MRI analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": true,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">MRI analysis</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Overview</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../MRIQC.html"> 
+<span class="menu-text">MRIQC</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../fMRIPrep.html"> 
+<span class="menu-text">fMRIPrep</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../code.html"> 
+<span class="menu-text">Analyses</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../Technical_stuff_intro.html"> 
+<span class="menu-text">Technical notes</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#visual-reports-of-fmriprep" id="toc-visual-reports-of-fmriprep" class="nav-link active" data-scroll-target="#visual-reports-of-fmriprep">Visual Reports of fMRIPrep</a></li>
+  <li><a href="#general-html-output-file" id="toc-general-html-output-file" class="nav-link" data-scroll-target="#general-html-output-file">General html Output file</a>
+  <ul class="collapse">
+  <li><a href="#error-reports" id="toc-error-reports" class="nav-link" data-scroll-target="#error-reports">Error reports</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#anatomical-section" id="toc-anatomical-section" class="nav-link" data-scroll-target="#anatomical-section">Anatomical Section</a>
+  <ul class="collapse">
+  <li><a href="#brain-mask-and-brain-tissue-segmentation-of-the-t1w" id="toc-brain-mask-and-brain-tissue-segmentation-of-the-t1w" class="nav-link" data-scroll-target="#brain-mask-and-brain-tissue-segmentation-of-the-t1w">Brain mask and brain tissue segmentation of the T1w</a></li>
+  <li><a href="#spatial-normalization-of-the-anatomical-t1w-reference" id="toc-spatial-normalization-of-the-anatomical-t1w-reference" class="nav-link" data-scroll-target="#spatial-normalization-of-the-anatomical-t1w-reference">Spatial normalization of the anatomical T1w reference</a></li>
+  <li><a href="#surface-reconstruction" id="toc-surface-reconstruction" class="nav-link" data-scroll-target="#surface-reconstruction">Surface reconstruction</a></li>
+  </ul></li>
+  <li><a href="#functional-section" id="toc-functional-section" class="nav-link" data-scroll-target="#functional-section">Functional Section</a>
+  <ul class="collapse">
+  <li><a href="#alignment-between-the-anatomical-reference-of-the-fieldmap-and-the-target-epi" id="toc-alignment-between-the-anatomical-reference-of-the-fieldmap-and-the-target-epi" class="nav-link" data-scroll-target="#alignment-between-the-anatomical-reference-of-the-fieldmap-and-the-target-epi">Alignment between the anatomical reference of the fieldmap and the target EPI</a></li>
+  <li><a href="#susceptibility-distortion-correction" id="toc-susceptibility-distortion-correction" class="nav-link" data-scroll-target="#susceptibility-distortion-correction">Susceptibility distortion correction</a></li>
+  <li><a href="#compcor-by-default-in-fmriprep" id="toc-compcor-by-default-in-fmriprep" class="nav-link" data-scroll-target="#compcor-by-default-in-fmriprep">CompCor by default in fmriprep</a></li>
+  <li><a href="#alignment-of-functional-and-anatomical-mri-data-coregistration" id="toc-alignment-of-functional-and-anatomical-mri-data-coregistration" class="nav-link" data-scroll-target="#alignment-of-functional-and-anatomical-mri-data-coregistration"><strong>Alignment of functional and anatomical MRI data (coregistration)</strong></a></li>
+  <li><a href="#time-series-carpet-plot-and-correlation-matrices" id="toc-time-series-carpet-plot-and-correlation-matrices" class="nav-link" data-scroll-target="#time-series-carpet-plot-and-correlation-matrices">Time-series carpet plot and correlation matrices</a></li>
+  </ul></li>
+  <li><a href="#important-note-smoothing-is-not-in-the-pipeline-of-fmriprep-therefore-it-is-a-step-that-has-to-be-executed-after-running-the-fmriprep-pipeline." id="toc-important-note-smoothing-is-not-in-the-pipeline-of-fmriprep-therefore-it-is-a-step-that-has-to-be-executed-after-running-the-fmriprep-pipeline." class="nav-link" data-scroll-target="#important-note-smoothing-is-not-in-the-pipeline-of-fmriprep-therefore-it-is-a-step-that-has-to-be-executed-after-running-the-fmriprep-pipeline.">Important Note: Smoothing is not in the pipeline of fmriprep, therefore it is a step that has to be executed after running the fmriprep pipeline.</a></li>
+  <li><a href="#exclusion-criteria-of-pre-processed-data-based-on-fmriprep-visual-report" id="toc-exclusion-criteria-of-pre-processed-data-based-on-fmriprep-visual-report" class="nav-link" data-scroll-target="#exclusion-criteria-of-pre-processed-data-based-on-fmriprep-visual-report">Exclusion criteria of pre-processed data based on fMRIPrep visual report</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="visual-reports-of-fmriprep" class="level1">
+<h1>Visual Reports of fMRIPrep</h1>
+</section>
+<section id="general-html-output-file" class="level1">
+<h1>General html Output file</h1>
+<p>Based on:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1) (<a href="zotero://select/library/items/GBRPHHIX">“Introduction to MRIQC [TRAIN-05-2022]”, 2022</a>)</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2) (<a href="zotero://select/library/items/GEEHDAYD">“fMRIPrep Tutorial #3: Examining the Preprocessed Data — Andy’s Brain Book 1.0 documentation”</a>)</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3) Notes after my discussion with Gaëlle Leroux (CRNL) on 25/04/2024</p>
+<section id="error-reports" class="level2">
+<h2 class="anchored" data-anchor-id="error-reports">Error reports</h2>
+<ul>
+<li>First check for the error reports at the very end of the html file</li>
+</ul>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<ul>
+<li><p>Overall summary of the pipeline –&gt; information about anatomical and functional images</p>
+<ul>
+<li>This should much the options we defined on the script that we used to run fmriprep</li>
+</ul></li>
+</ul>
+</section>
+<section id="anatomical-section" class="level2">
+<h2 class="anchored" data-anchor-id="anatomical-section">Anatomical Section</h2>
+<section id="brain-mask-and-brain-tissue-segmentation-of-the-t1w" class="level3">
+<h3 class="anchored" data-anchor-id="brain-mask-and-brain-tissue-segmentation-of-the-t1w">Brain mask and brain tissue segmentation of the T1w</h3>
+<ul>
+<li><p>A good overview of the surfaces as well as the brain masks created by Freesurfer</p>
+<ul>
+<li>White matter boundary is outlined in blue</li>
+<li>Estimated brain mask is outlined in red</li>
+<li>Grey matter boundary is outlined in magenda</li>
+</ul></li>
+</ul>
+<p><strong>Example:</strong></p>
+<p>[image]</p>
+<ul>
+<li><p><strong>Inaccurate brain mask</strong> <strong>(<a href="zotero://select/library/items/KSI3K2X5">Provins et al., 2023</a>)</strong></p>
+<ul>
+<li>The brain mask should closely follow the contour of the brain.</li>
+<li>An inaccurate brain mask presents <strong>“bumps”</strong> surrounding high-intensity areas of signal outside of the cortex (e.g., a mask inclusding patches of he skull) and/or holes surrounding signal drop-out regions.</li>
+</ul></li>
+<li><p><strong>Error in brain tissue segmentation of T1w images (<a href="zotero://select/library/items/KSI3K2X5">Provins et al., 2023</a>)</strong></p>
+<ul>
+<li><p>To confirm the good quality of the segmentation verify that</p>
+<ul>
+<li>The magenda contour accurately outline the ventricles</li>
+<li>The blue contour followed the boundary between GM and WM</li>
+</ul></li>
+<li><p><strong>Exclusion criteria: inclusion of tissues other than the tissue of interest in the contour delineations</strong></p></li>
+</ul></li>
+</ul>
+<p><strong>Example:</strong></p>
+<p>[image]</p>
+</section>
+<section id="spatial-normalization-of-the-anatomical-t1w-reference" class="level3">
+<h3 class="anchored" data-anchor-id="spatial-normalization-of-the-anatomical-t1w-reference">Spatial normalization of the anatomical T1w reference</h3>
+<ul>
+<li><p>A gif that if you hover your mouse over the image, the image will flicker between participant space and to the chosen template (e.g.&nbsp;here MNI152NLin6Asym space. –&gt; This can show you how well the native space was registered to the standard space overall</p></li>
+<li><p><strong>Failure in normalization to MNI space (<a href="zotero://select/library/items/KSI3K2X5">Provins et al., 2023</a>)</strong></p>
+<p>&nbsp; &nbsp; &nbsp; –&gt; Normalization must be perfect</p>
+<p>&nbsp; &nbsp; &nbsp; –&gt; To verify successful normalization assess the correct alignment of the following structures (in order of importance):</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1) Ventricles</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2) subcortical regions</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3) corpus callosum</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4) cerebellum</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5) cortical gray matter (GM)</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&gt; Misalignment of 1,2 or 3: immediate exclusion</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&gt; For 5 a bit more loose because volumetric (image) registration may not resolve substantial inter-individual differences</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&gt; Any extreme stretching or distortion of the T1w image also indicates a failed normalization</p>
+<p>--&gt; <strong>Tip: Put your mouse at the edge of the participant brain, should be perfect when flickers1 between the 2 spaces (This is not the case for the MRIQC output that has only the 1st iteration while here the algorithm has multiple iteration and trying to optimize the procedure).</strong></p>
+<p><strong>--&gt; Tip:</strong> Make sure to check the alignment not only in the outlines of the brain (see above) but <strong>also in the internal structures such as the ventricles.</strong></p>
+<p><strong>--&gt; Tip:</strong> (From discussion with Gaëlle) Do not pay so much emphasis in <strong>image x=0</strong> as it it difficult and errors must be expected</p></li>
+</ul>
+<p><strong>Example:</strong></p>
+<p>--&gt; add the gif here with the mouse on the edge</p>
+</section>
+<section id="surface-reconstruction" class="level3">
+<h3 class="anchored" data-anchor-id="surface-reconstruction">Surface reconstruction</h3>
+<ul>
+<li>White matter in blue</li>
+<li>Pial surface in red</li>
+<li>These are overlaid on the participant’s T1w image</li>
+<li>Usually you do not exclude data here except the reconstructed surfaces are extremely inaccurate but you should already have seen that in MRIQC</li>
+</ul>
+</section>
+</section>
+<section id="functional-section" class="level2">
+<h2 class="anchored" data-anchor-id="functional-section">Functional Section</h2>
+<section id="alignment-between-the-anatomical-reference-of-the-fieldmap-and-the-target-epi" class="level3">
+<h3 class="anchored" data-anchor-id="alignment-between-the-anatomical-reference-of-the-fieldmap-and-the-target-epi">Alignment between the anatomical reference of the fieldmap and the target EPI</h3>
+<ul>
+<li>After discussion with Gaëlle patterns like the one’s highlighted below are normal</li>
+</ul>
+<p>[image]</p>
+</section>
+<section id="susceptibility-distortion-correction" class="level3">
+<h3 class="anchored" data-anchor-id="susceptibility-distortion-correction">Susceptibility distortion correction</h3>
+<ul>
+<li>a gif that shows before and after distortion correction</li>
+<li>Note that the correction is affected by the direction AP vs PA</li>
+<li><strong>Any observation of susceptibility distortion artifacts leads to the exclusion of the scan</strong></li>
+</ul>
+<p><strong>Example:</strong></p>
+<p>[image]</p>
+</section>
+<section id="compcor-by-default-in-fmriprep" class="level3">
+<h3 class="anchored" data-anchor-id="compcor-by-default-in-fmriprep">CompCor by default in fmriprep</h3>
+<ul>
+<li>Data driven approach to &nbsp;add nuisance regressors –&gt; if you want to use this approach check also the correlation heatmap</li>
+</ul>
+</section>
+<section id="alignment-of-functional-and-anatomical-mri-data-coregistration" class="level3">
+<h3 class="anchored" data-anchor-id="alignment-of-functional-and-anatomical-mri-data-coregistration"><strong>Alignment of functional and anatomical MRI data (coregistration)</strong></h3>
+<ul>
+<li><p><strong>Co - registration problem</strong> (<a href="zotero://select/library/items/KSI3K2X5">Provins et al., 2023</a>)</p>
+<ul>
+<li>Check the alignment of image intensity edges and the anatomical landmarks (e.g.&nbsp;the ventricles and the corpus callosum) between the BOLD and the T1w images</li>
+</ul></li>
+</ul>
+</section>
+<section id="time-series-carpet-plot-and-correlation-matrices" class="level3">
+<h3 class="anchored" data-anchor-id="time-series-carpet-plot-and-correlation-matrices">Time-series carpet plot and correlation matrices</h3>
+<ul>
+<li><p>GS: Global Signal</p></li>
+<li><p>GSCSF: Global Signal of the Cerebral Spinal Fluid</p></li>
+<li><p>GSWM: Global Signal of the White Matter</p></li>
+<li><p>2 measures of motion</p>
+<ul>
+<li>DVARS</li>
+<li>FD: Framewise displacement</li>
+</ul></li>
+</ul>
+<p>--&gt; Changes in motion tend to be correlated with GS and it is up to us to decide if we include any of these vars in the model. In general DVARS and FD are good ways to account for signal caused by motion artifacts</p>
+</section>
+</section>
+<section id="important-note-smoothing-is-not-in-the-pipeline-of-fmriprep-therefore-it-is-a-step-that-has-to-be-executed-after-running-the-fmriprep-pipeline." class="level2">
+<h2 class="anchored" data-anchor-id="important-note-smoothing-is-not-in-the-pipeline-of-fmriprep-therefore-it-is-a-step-that-has-to-be-executed-after-running-the-fmriprep-pipeline.">Important Note: Smoothing is not in the pipeline of fmriprep, therefore it is a step that has to be executed after running the fmriprep pipeline.</h2>
+<ul>
+<li><p>Smoothing has been ommited by design –&gt; The fmriprep does not make assumption on how you are going to analyze your data</p>
+<ul>
+<li>e.g.&nbsp;Some MVPA studies do not do any smoothing at all before the first level analysis</li>
+</ul></li>
+<li><p>The amount of smoothing is a matter of judgement</p>
+<ul>
+<li>Experiments that are focused on larger cortical areas, probably want to use larger smoothing kernels</li>
+</ul></li>
+</ul>
+<p><strong>--&gt;Tip: Since we have multiple tasks with different goals, smoothing should be executed with this in mind and probably individually for each task/goal. When performing that use a prefix (e.g.&nbsp;smo0.8 or sth along those lines) in the name of the data so it is quite clear and easy to find what was the smoothing!</strong></p>
+</section>
+<section id="exclusion-criteria-of-pre-processed-data-based-on-fmriprep-visual-report" class="level2">
+<h2 class="anchored" data-anchor-id="exclusion-criteria-of-pre-processed-data-based-on-fmriprep-visual-report">Exclusion criteria of pre-processed data based on fMRIPrep visual report</h2>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Copyright 2024, Anastasios Dadiotis</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

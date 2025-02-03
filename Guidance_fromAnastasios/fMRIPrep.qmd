@@ -1,0 +1,81 @@
+---
+title: "fMRI preprocessing"
+author: "Anastasios Dadiotis"
+editor: visual
+toc: true
+format:
+  html:
+    code-tools: true
+    self-contained: true
+bibliography: references.bib
+---
+
+# Intro
+
+Based on:
+
+1.  [@introduc]
+2.  [@provins2023]
+3.  [@fmriprep]
+4.  Notes after my discussion with Gaëlle Leroux (CRNL) on 25/04/2024
+
+ToDO:
+
+-   [ ] Check the [pdf](https://bpb-us-e1.wpmucdn.com/websites.harvard.edu/dist/f/49/files/2022/09/CBS_MRI_Qualitative_Qualitity_Control_Manual.pdf) that Gaëlle sent me named "Train your eyes" Alhtough, this is a resource generally for artifacts in structural and functional MRI data and not specifically for fMRIPrep, it might be useful to check it out to build some intuition on what to look for in the [**raw**]{.underline} data.
+-   [ ] 
+
+# Artifacts in functional and structural MRI
+
+## Introduction
+
+Below there is a general introduction to the most common artifacts in MRI data. This is a general introduction and not specific to fMRIPrep.
+
+It is based on <https://bpb-us-e1.wpmucdn.com/websites.harvard.edu/dist/f/49/files/2022/09/CBS_MRI_Qualitative_Qualitity_Control_Manual.pdf>
+
+**Artifacts:** Factors that can compromise data quality.
+
+-   Only detectable by manually scrolling through each slide of RAW data to look for visible distortions
+
+### Examples of MRI artifacts
+
+1.  Field of View (FOV) clipping anatomy
+
+2.  Wrapping
+
+3.  Signal loss/Susceptibility Artifact
+
+4.  Ringing, Stripping, or Blurring (structural scans)
+
+5.  Ghosting
+
+6.  Radio Frequency Noise/Spiking
+
+7.  Signal Inhomogeneity
+
+8.  Motion Slice Artifact (functional scans)
+
+### What causes MRI artifacts?
+
+1.  **Experimenter Error**
+
+    1.  Field of View (FOV) positioned wrong -\> brain image clipped -\> **Wrapping**
+
+    2.  Forgot to move all metal -\> signal loss -\> "Susceptibility artifact"
+
+2.  **Subject Motion**
+
+    1.  Ringing, Stripping or Blurring (in structural scans)
+
+    2.  "Motion Slice artifact" (in functional scans)
+
+3.  **Problems with the Scanner/Head Coil**
+
+    1.  Radio Frequency Noise/Spiking
+
+    2.  Signal Inhomogeneity
+
+4.  **Artifacts from Image Reconstruction**
+
+    1.  Consistent low-level "Ghosting"
+
+    2.  Some types of "Ringing" (e.g "Shadowed Arc Artifact" in structural scans")
